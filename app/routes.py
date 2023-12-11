@@ -1,13 +1,34 @@
-from flask import render_template, url_for, redirect, jsonify
-from app import app
-from app.parsers.package_lock_parser import parse_package_lock
-import os 
+# app/routes.py
 
-@app.route('/')
-def index():
-    package_lock_path = os.path.join(os.path.dirname(__file__), '..', 'package-lock.json')
-    sbom_data = parse_package_lock(package_lock_path)
-    sbom_dict = sbom_data.to_dict()
+from flask import Blueprint, jsonify, request, json, Response
+from app.parsers.package_lock_parser import parse_package_lock, write_to_file
+import os
 
-    # Use 'jsonify' to ensure proper JSON response
-    return jsonify(sbom_dict)
+routes = Blueprint('routes', __name__)
+
+@routes.route('/')
+def create_js_sbom():
+    package_lock_path = "./package-lock.json"
+    output = parse_package_lock(package_lock_path)
+
+    output_file_path = 'js-sbom.json'
+    write_to_file(output, output_file_path)
+
+    return jsonify({"message": "Parsed data written to js-sbom.json file."})
+
+@routes.route('/js/npm-parser', methods=['POST'])
+def npm_parser():
+    try:
+        uploaded_file = request.files['package_lock']
+        if uploaded_file.filename != '':
+            file_path = f"uploads/{uploaded_file.filename}"
+            uploaded_file.save(file_path)
+
+            parsed_data = parse_package_lock(file_path)
+
+            parsed_data_str = str(parsed_data)
+
+            os.remove(file_path)
+            return Response(parsed_data_str, content_type='text/plain')
+    except Exception as e:
+        return jsonify({"error": str(e)})

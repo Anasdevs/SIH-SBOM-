@@ -1,0 +1,171 @@
+import json
+from sbom import UniversalSBOM, Component
+
+def parse_package_lock(package_lock_path):
+    with open(package_lock_path, 'r') as f:
+        package_data = json.load(f)
+
+    def process_deps(dep_data):
+        components = []
+        if isinstance(dep_data, dict):
+            for dep_name, dep_info in dep_data.items():
+                if isinstance(dep_info, dict):
+                    version = dep_info.get('version', 'unknown')
+                    purl = f"pkg:npm/{dep_name}@{version}"
+
+                    component = Component(
+                        component_type="library",
+                        name=dep_name,
+                        version=version,
+                        purl=purl,
+                        dependencies=process_deps(dep_info.get('dependencies', {}))
+                    )
+
+                    components.append(component)
+                else:
+                    # Handle case where dep_info is a string
+                    version = 'unknown'
+                    purl = f"pkg:npm/{dep_name}@{version}"
+
+                    component = Component(
+                        component_type="library",
+                        name=dep_name,
+                        version=version,
+                        purl=purl,
+                        dependencies=[]
+                    )
+
+                    components.append(component)
+
+        return components
+
+    metadata = {
+        "tools": [],
+        "authors": [],
+        "componentCounts": {
+            "total": 0,
+            "languages": ["js"]
+        }
+    }
+
+    root_dependencies = process_deps(package_data.get('packages', {}))
+
+    app_component = Component(
+        component_type="application",
+        name=package_data.get('name', 'Unknown'),
+        version=package_data.get('version', 'Unknown'),
+        purl=f"pkg:npm/{package_data.get('name', 'Unknown')}@{package_data.get('version', 'Unknown')}",
+        dependencies=root_dependencies
+    )
+
+    sbom = UniversalSBOM(metadata, [app_component])
+
+    return sbom
+
+
+
+
+
+
+
+
+
+import json
+
+def parse_package_lock(package_lock_path):
+    with open(package_lock_path, 'r') as file:
+        lock_data = json.load(file)
+        sbom = {
+            "bomFormat": "CycloneDX",
+            "specVersion": "1.3",
+            "serialNumber": "urn:uuid:3e9e6407-790c-47af-be20-621b2132d6e2",
+            "version": "1.0",
+            "metadata": {
+                "timestamp": "2023-01-01T12:00:00Z"
+            },
+            "components": []
+        }
+        dependencies = lock_data["packages"][""]["dependencies"]
+        
+        # Convert direct dependencies to components
+        for package_name, version in dependencies.items():
+            component = {
+                "type": "library",
+                "name": package_name,
+                "version": version,
+                "purl": f"pkg:npm/{package_name}@{version}"
+            }
+            sbom["components"].append(component)
+            
+            # Recursively process subdependencies
+            process_subdependencies(lock_data, package_name, sbom)
+
+    return sbom
+
+def process_subdependencies(lock_data, package_name, sbom):
+    if package_name in lock_data["packages"]:
+        subdependencies = lock_data["packages"][package_name]["dependencies"] if "dependencies" in lock_data["packages"][package_name] else {}
+        for subpackage_name, subversion in subdependencies.items():
+            subcomponent = {
+                "type": "library",
+                "name": subpackage_name,
+                "version": subversion,
+                "purl": f"pkg:npm/{subpackage_name}@{subversion}"
+            }
+            sbom["components"].append(subcomponent)
+            
+            # Recursively process sub-subdependencies
+            process_subdependencies(lock_data, subpackage_name, sbom)
+
+
+
+
+
+
+
+import json
+
+def parse_package_lock(package_lock_path):
+    with open(package_lock_path, 'r') as file:
+        lock_data = json.load(file)
+        sbom = {
+            "type": "application",
+            "name": "my-app",
+            "version": "0.1.0",
+            "purl": "pkg:npm/my-app@0.1.0",
+            "dependencies": []
+        }
+        dependencies = lock_data["packages"][""]["dependencies"]
+        
+        # Convert direct dependencies to components
+        for package_name, version in dependencies.items():
+            component = {
+                "type": "library",
+                "name": package_name,
+                "version": version,
+                "purl": f"pkg:npm/{package_name}@{version}",
+                "dependencies": []
+            }
+            sbom["dependencies"].append(component)
+            
+            # Recursively process subdependencies
+            process_subdependencies(lock_data, package_name, component)
+
+    return [sbom]
+
+def process_subdependencies(lock_data, package_name, parent_component):
+    if package_name in lock_data["packages"]:
+        subdependencies = lock_data["packages"][package_name]["dependencies"] if "dependencies" in lock_data["packages"][package_name] else {}
+        for subpackage_name, subversion in subdependencies.items():
+            subcomponent = {
+                "type": "library",
+                "name": subpackage_name,
+                "version": subversion,
+                "purl": f"pkg:npm/{subpackage_name}@{subversion}",
+                "dependencies": []
+            }
+            parent_component["dependencies"].append(subcomponent)
+            
+            # Recursively process sub-subdependencies
+            process_subdependencies(lock_data, subpackage_name, subcomponent)
+
