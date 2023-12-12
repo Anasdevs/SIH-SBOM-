@@ -1,12 +1,14 @@
-# app/parsers/package_parser.py
+import json 
 
-import json
+def parse_package_lock(package_lock_path, package_audit_path):
 
-def parse_package_lock(package_lock_path):
     components = []
 
     with open(package_lock_path) as f:
-        pkg_json = json.load(f)
+        pkg_json = json.load(f)  
+
+    with open(package_audit_path) as f:
+        vulnerabilities_data = json.load(f)["vulnerabilities"]
 
     application = {
         "type": "application",
@@ -19,39 +21,59 @@ def parse_package_lock(package_lock_path):
 
     def add_component(name, version, purl, dependencies=[]):
         component = {
-            "type": "library",
+            "type": "library", 
             "name": name,
             "version": version,
             "purl": purl,
             "dependencies": dependencies,
+            "vulnerabilities": [],   
         }
         return component
+
+    def add_vulnerabilities(component, vulnerabilities_data):
+
+        component_name = component["name"]
+
+        if component_name in vulnerabilities_data:
+
+           vulnerability_info = vulnerabilities_data[component_name]
+
+           vulnerability = {
+               "name": vulnerability_info["name"],
+               "severity": vulnerability_info["severity"],
+               "via": vulnerability_info["via"],
+               "effects": vulnerability_info["effects"]  
+           }
+
+           component["vulnerabilities"].append(vulnerability)
 
     def process_deps(deps, parent):
         if not deps:
             return
-        for name in deps.keys():
+        for name, dep_info in deps.items():
             version = "unknown"
-            if isinstance(deps[name], str):
-                version = deps[name]
+            if isinstance(dep_info, str):
+                version = dep_info
             else:
-                version = deps[name].get("version")
+                version = dep_info.get("version")
             if not version:
                 version = "unknown"
             if not name:
                 purl = f"pkg:npm/{parent['name']}@{version}"
-                childComponent = add_component(name, version, purl, [])
+                child_component = add_component(name, version, purl, [])
                 if parent:
-                    parent["dependencies"].append(childComponent)
+                    parent["dependencies"].append(child_component)
+                    add_vulnerabilities(child_component, vulnerabilities_data)
             else:
                 purl = f"pkg:npm/{name}@{version}"
-                childComponent = add_component(name, version, purl, [])
+                child_component = add_component(name, version, purl, [])
                 if parent:
-                    parent["dependencies"].append(childComponent)
-            if isinstance(deps[name], str):
-                process_deps(False, childComponent)
+                    parent["dependencies"].append(child_component)
+                    add_vulnerabilities(child_component, vulnerabilities_data)
+            if isinstance(dep_info, str):
+                process_deps(False, child_component)
             else:
-                process_deps(deps[name].get("dependencies"), childComponent)
+                process_deps(dep_info.get("dependencies"), child_component)
 
     process_deps(pkg_json.get("packages"), application)
 
@@ -59,4 +81,5 @@ def parse_package_lock(package_lock_path):
 
 def write_to_file(output, output_file_path):
     with open(output_file_path, 'w') as output_file:
+
         json.dump(output, output_file, indent=2)

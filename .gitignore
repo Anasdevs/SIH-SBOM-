@@ -2,3 +2,5 @@ __pycache__
 .vscode
 venv
 /app/__pycache__
+package_audit.json
+package-lock

@@ -10,7 +10,8 @@ routes = Blueprint('routes', __name__)
 @routes.route('/')
 def create_js_sbom():
     package_lock_path = "./package-lock.json"
-    output = parse_package_lock(package_lock_path)
+    package_audit_path="./package_audit.json"
+    output = parse_package_lock(package_lock_path, package_audit_path)
 
     output_file_path = 'js-sbom.json'
     write_to_file(output, output_file_path)
@@ -21,18 +22,22 @@ def create_js_sbom():
 @routes.route('/js/npm-parser', methods=['POST'])
 def npm_parser():
     try:
-        uploaded_file = request.files['package_lock']
-        if uploaded_file.filename != '':
-            file_path = f"uploads/{uploaded_file.filename}"
-            uploaded_file.save(file_path)
+        uploaded_package_lock = request.files['package_lock']
+        uploaded_package_audit = request.files['package_audit']
 
-            parsed_data = parse_package_lock(file_path)
+        if uploaded_package_lock and uploaded_package_audit:  
+            package_lock_path = f"uploads/{uploaded_package_lock.filename}"
+            package_audit_path = f"uploads/{uploaded_package_audit.filename}"
+            uploaded_package_lock.save(package_lock_path)
+            uploaded_package_audit.save(package_audit_path)
+
+            parsed_data = parse_package_lock(package_lock_path, package_audit_path)
             json_string = json.dumps(
                 parsed_data, separators=(",", ":"))
-            os.remove(file_path)
+            os.remove(package_lock_path)
+            os.remove(package_audit_path)
+
             return jsonify(json_string)
-            # response = Response(json_parsed_data)
-            # print(response.headers)
-            # return response
+    
     except Exception as e:
         return jsonify({"error": str(e)})
