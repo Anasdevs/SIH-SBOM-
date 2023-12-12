@@ -6,6 +6,7 @@ import os
 
 routes = Blueprint('routes', __name__)
 
+
 @routes.route('/')
 def create_js_sbom():
     package_lock_path = "./package-lock.json"
@@ -16,6 +17,7 @@ def create_js_sbom():
 
     return jsonify({"message": "Parsed data written to js-sbom.json file."})
 
+
 @routes.route('/js/npm-parser', methods=['POST'])
 def npm_parser():
     try:
@@ -25,10 +27,12 @@ def npm_parser():
             uploaded_file.save(file_path)
 
             parsed_data = parse_package_lock(file_path)
-
-            parsed_data_str = str(parsed_data)
-
+            json_string = json.dumps(
+                parsed_data, separators=(",", ":"))
             os.remove(file_path)
-            return Response(parsed_data_str, content_type='text/plain')
+            return jsonify(json_string)
+            # response = Response(json_parsed_data)
+            # print(response.headers)
+            # return response
     except Exception as e:
         return jsonify({"error": str(e)})
