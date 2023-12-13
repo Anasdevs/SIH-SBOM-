@@ -8,6 +8,10 @@ routes = Blueprint('routes', __name__)
 
 
 @routes.route('/')
+def starter_function():
+    return "Flask: Parser for SIH"
+
+@routes.route('/generate')
 def create_js_sbom():
     package_lock_path = "./package-lock.json"
     package_audit_path="./package_audit.json"
