@@ -100,7 +100,7 @@ def pip_parser():
         update_vulnerabilities(output, vulnerabilities_path)
 
 
-        json_string = json.dumps(output, sort_keys=False)
+        json_string = json.dumps(output, sort_keys=False, ensure_ascii=False)
         
         os.remove(requirements_path) 
         os.remove(vulnerabilities_path)

@@ -2,11 +2,17 @@ import re
 import subprocess
 import json
 import os
+import chardet 
 
 def parse_requirements(requirements_path):
     components = []
 
-    with open(requirements_path, encoding='utf-16') as f:
+    
+    with open(requirements_path, 'rb') as f:
+        raw_data = f.read()
+        encoding = chardet.detect(raw_data)['encoding']
+
+    with open(requirements_path, encoding=encoding) as f:
         requirements_data = f.read()
 
     requirements_list = requirements_data.split('\n')
