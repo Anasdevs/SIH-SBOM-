@@ -1,14 +1,16 @@
 import json 
 
-def parse_package_lock(package_lock_path, package_audit_path):
+def parse_package_lock(package_lock_path, package_audit_path, obj=False):
 
     components = []
 
     with open(package_lock_path) as f:
         pkg_json = json.load(f)  
-
-    with open(package_audit_path) as f:
-        vulnerabilities_data = json.load(f)["vulnerabilities"]
+    if obj == False:
+        with open(package_audit_path) as f:
+            vulnerabilities_data = json.load(f)["vulnerabilities"]
+    else:
+        vulnerabilities_data = package_audit_path['vulnerabilities']
 
     application = {
         "type": "application",
