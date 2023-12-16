@@ -2,6 +2,7 @@
 
 from flask import Blueprint, jsonify, request, json, Response
 from app.parsers.package_lock_parser import parse_package_lock, write_to_file
+from app.parsers.requirements_parser import parse_requirements, fetch_vulnerabilities, update_vulnerabilities
 from dotenv import load_dotenv, dotenv_values
 import os
 
@@ -38,14 +39,78 @@ def npm_parser():
 
             parsed_data = parse_package_lock(package_lock_path, package_audit_path)
             json_string = json.dumps(
-                parsed_data, separators=(",", ":"))
+                parsed_data, separators=(",", ":"), sort_keys=False, ensure_ascii=False) 
             os.remove(package_lock_path)
             os.remove(package_audit_path)
 
-            return jsonify(json_string)
+            return jsonify(json_string, )
     
     except Exception as e:
         return jsonify({"error": str(e)})
+    
+
+
+
+#python routes 
+
+@routes.route('/python-parser') #use this route to test locally  (put requirements.txt in uploads folder)
+def create_python_sbom():
+    # Path to the requirements.txt file in the 'uploads' folder
+    requirements_path = './uploads/requirements.txt'
+    
+    # Path to the vulnerabilities JSON file in the 'uploads' folder
+    vulnerabilities_path = './uploads/audit.json'
+    
+    # Path to the output JSON file
+    output_file_path = './uploads/python-sbom.json'
+    
+    # Fetch vulnerabilities (this will generate 'uploads/audit.json')
+    fetch_vulnerabilities(requirements_path)
+
+    # Parse requirements and update vulnerabilities
+    output = parse_requirements(requirements_path)
+    update_vulnerabilities(output, vulnerabilities_path)
+
+    write_to_file(output, output_file_path)
+
+    return jsonify({"message": "Parsed data written to python-sbom file."})
+
+
+
+#use for postman
+@routes.route('/python/pip-parser', methods=['POST']) #you can use this route in postman
+def pip_parser():
+    try:
+        if 'requirements_file' not in request.files:
+            return jsonify({"error": "'requirements_file' is required."})
+
+        uploaded_requirements_file = request.files['requirements_file']
+
+        if not uploaded_requirements_file.filename:
+            return jsonify({"error": "File name cannot be empty."})
+
+        requirements_path = f"uploads/{uploaded_requirements_file.filename}"
+        uploaded_requirements_file.save(requirements_path)
+
+        vulnerabilities_path = './uploads/audit.json'
+
+        #this will generate /uploads/audit.json (temporarily)
+        fetch_vulnerabilities(requirements_path)
+
+        output = parse_requirements(requirements_path)
+        update_vulnerabilities(output, vulnerabilities_path)
+
+
+        json_string = json.dumps(output, sort_keys=False, ensure_ascii=False)
+        
+        os.remove(requirements_path) 
+        os.remove(vulnerabilities_path)
+
+        return jsonify(json_string)
+
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
 
 # ============== ZIP File handling =====================
 def extract_zip(zip_path, extract_dir):
@@ -59,8 +124,8 @@ def clean_temp_directory(extract_dir):
 import requests
 def post_request_with_file(package_json_file_path, package_lock_file_path):
     try:
-        url = os.getenv("js-server-url") +"/api/javascript/generateSbom"
-        headers = {'auth-type':'backend', 'auth-token':os.getenv('js-server-auth-key')}
+        url = os.getenv("js-server-url") +"/api/javascript/auditJsPackage"
+        headers = {'auth_type':'backend', 'auth_code':os.getenv('js-server-auth-key')}
         print(headers)
 
         files = {
@@ -73,6 +138,7 @@ def post_request_with_file(package_json_file_path, package_lock_file_path):
             print("Request successful!")
             print("Response:")
             print(response.json())
+            return response.json()
         else:
             print(f"Request failed with status code: {response.status_code}")
             print("Response:")
@@ -109,50 +175,39 @@ def upload_file():
         # requirement_txt_files = []
         package_files = {"package":"",'package_lock':""}
 
+        components = []
         for root, dirs, files in os.walk(extract_dir):
             for file_name in files:
                 file_path = os.path.join(root, file_name)
 
-                # Main Code 
                 print("hit main code ",file_name)
 
                 if file_name == 'package.json':
                     package_files['package'] = file_path
-                    # content = read_package_json(file_path)
-                    # package_json_files.append(content)
 
                 if file_name == 'package-lock.json':
                     package_files['package_lock'] = file_path
 
-                    # content = read_package_json(file_path)
-                    # package_json_files.append(content)
-                    
-
-                elif file_name == 'REQUIREMENT.txt':
-                    # content = read_requirement_txt(file_path)
-                    # requirement_txt_files.append(content)
+                elif file_name == 'REQUIREMENTS.txt':
                     pass
 
                 if package_files['package'] !='' and package_files['package_lock'] != '':
                     print('creating post req')
-                    post_request_with_file(package_json_file_path=package_files['package'], package_lock_file_path=package_files['package_lock'])
+                    res = post_request_with_file(package_json_file_path=package_files['package'], package_lock_file_path=package_files['package_lock'])
+                    print(res.keys())
+                    audit_obj = res["data"]
 
-        result = {
-            "success": True,
-            "SBOM":{"package.json":package_json_files,
-                    "requirement":requirement_txt_files},
-            "files found":{
-                "package.json":package_json_files,
-                "requirement":requirement_txt_files
-            }
-        }
+                    parsed_data = parse_package_lock(package_lock_path=package_files['package_lock'],package_audit_path=audit_obj,obj=True)
+                    components.extend(parsed_data)
+                    package_files['package'] = ''
+                    package_files['package_lock']= ''
 
-        return jsonify(result)
+        return jsonify(components)
 
     except Exception as e:
+        print(e)
         return jsonify({"error": str(e)}), 500
 
     finally:
         clean_temp_directory(extract_dir)
-
 

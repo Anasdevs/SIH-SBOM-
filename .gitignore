@@ -3,4 +3,4 @@ __pycache__
 venv
 /app/__pycache__
 package_audit.json
-package-lock
+package-lock.json
