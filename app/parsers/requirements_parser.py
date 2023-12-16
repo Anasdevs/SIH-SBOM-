@@ -3,6 +3,15 @@ import subprocess
 import json
 import os
 import chardet 
+import sys
+
+try:
+    print(sys.executable)
+    import pip_audit
+    subprocess.run(["pip-audit", "--version"])
+
+except Exception as e:
+    print(f"pip-audit error: {e}")
 
 def parse_requirements(requirements_path):
     components = []
@@ -63,8 +72,23 @@ def write_to_file(output, output_file_path):
 #it will run the pip-audit on requirements.txt 
 def fetch_vulnerabilities(requirements_path):
     os.chdir('uploads')
-    subprocess.run(["pip-audit", "-f", "json", "|", "python", "-m", "json.tool", ">", "audit.json"], shell=True)
-    os.chdir('..')
+    try:
+        # Use subprocess.PIPE to capture the output for debugging
+        result = subprocess.run(
+            ["pip-audit", "-f", "json", "|", "python", "-m", "json.tool", ">", "audit.json"],
+            shell=True,
+            capture_output=True,
+            text=True
+        )
+        
+        # Print the result for debugging
+        print("Subprocess result:", result)
+        
+        if result.returncode != 0:
+            print("Error running pip-audit:", result.stderr)
+        
+    finally:
+        os.chdir('..')
 
 
 #for updating vulnerabilities array after we get audit.json
