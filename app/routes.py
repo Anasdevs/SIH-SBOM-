@@ -38,11 +38,11 @@ def npm_parser():
 
             parsed_data = parse_package_lock(package_lock_path, package_audit_path)
             json_string = json.dumps(
-                parsed_data, separators=(",", ":"))
+                parsed_data, separators=(",", ":"), sort_keys=False, ensure_ascii=False) 
             os.remove(package_lock_path)
             os.remove(package_audit_path)
 
-            return jsonify(json_string)
+            return jsonify(json_string, )
     
     except Exception as e:
         return jsonify({"error": str(e)})
