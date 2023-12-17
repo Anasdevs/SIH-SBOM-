@@ -17,6 +17,7 @@ def parse_package_lock(package_lock_path, package_audit_path, obj=False):
     application = {
         "type": "application",
         "name": pkg_json["name"],
+        "language": "javascript",
         "version": pkg_json["version"],
         "purl": f"pkg:npm/{pkg_json['name']}@{pkg_json['version']}",
         "dependencies": [],

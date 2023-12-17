@@ -265,8 +265,9 @@ def upload_file():
                     components.extend(parsed_data)
                     package_files['package'] = ''
                     package_files['package_lock'] = ''
-
-        return jsonify(components)
+        json_string = json.dumps(
+            components, sort_keys=False, ensure_ascii=False)
+        return jsonify(json_string)
 
     except Exception as e:
         print(e)
