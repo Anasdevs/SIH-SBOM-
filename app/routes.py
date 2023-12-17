@@ -2,9 +2,10 @@
 
 from flask import Blueprint, jsonify, request, json, Response
 from app.parsers.package_lock_parser import parse_package_lock, write_to_file
-from app.parsers.requirements_parser import parse_requirements, fetch_vulnerabilities, update_vulnerabilities
+from app.parsers.oss_python_parser import parse_requirements, fetch_vulnerabilities, update_vulnerabilities
 from dotenv import load_dotenv, dotenv_values
 import os
+import uuid
 
 routes = Blueprint('routes', __name__)
 
@@ -14,6 +15,7 @@ load_dotenv()
 def starter_function():
     return "Flask: Parser for SIH"
 
+#javascript parser for local testing
 @routes.route('/generate')
 def create_js_sbom():
     package_lock_path = "./package-lock.json"
@@ -25,6 +27,8 @@ def create_js_sbom():
 
     return jsonify({"message": "Parsed data written to js-sbom.json file."})
 
+
+#javascript parser for postman testing
 @routes.route('/js/npm-parser', methods=['POST'])
 def npm_parser():
     try:
@@ -53,32 +57,76 @@ def npm_parser():
 
 #python routes 
 
-@routes.route('/python-parser') #use this route to test locally  (put requirements.txt in uploads folder)
+@routes.route('/python-parser')  # use this route to test locally (put requirements.txt in uploads folder)
 def create_python_sbom():
-    # Path to the requirements.txt file in the 'uploads' folder
-    requirements_path = './uploads/requirements.txt'
-    
-    # Path to the vulnerabilities JSON file in the 'uploads' folder
-    vulnerabilities_path = './uploads/audit.json'
-    
-    # Path to the output JSON file
-    output_file_path = './uploads/python-sbom.json'
-    
-    # Fetch vulnerabilities (this will generate 'uploads/audit.json')
-    fetch_vulnerabilities(requirements_path)
+    try:
+        requirements_path = os.path.join(os.getcwd(), 'uploads', 'requirements.txt')
 
-    # Parse requirements and update vulnerabilities
-    output = parse_requirements(requirements_path)
-    update_vulnerabilities(output, vulnerabilities_path)
+        # Parsing requirements and fetching vulnerabilities from OSS Index API
+        components = parse_requirements(requirements_path)
+        purls = [component["purl"] for component in components]
 
-    write_to_file(output, output_file_path)
+        vulnerabilities_data = fetch_vulnerabilities(purls)
 
-    return jsonify({"message": "Parsed data written to python-sbom file."})
+        if vulnerabilities_data:
+            # Updating vulnerabilities in the components array
+            update_vulnerabilities(components, vulnerabilities_data)
+
+        output_file_path = os.path.join(os.getcwd(), 'uploads', 'python-sbom.json')
+
+        # Writes the parsed data to the 'python-sbom.json' file
+        write_to_file(components, output_file_path)
+
+        return jsonify({"message": "Parsed data written to python-sbom file."})
+
+    except Exception as e:
+        return jsonify({"error": str(e)})
 
 
 
+
+#this route was using pip-audit to fetch vulnerabilities which was taking so long to fetch the vulnerabilities so that's why not using this
 #use for postman
-@routes.route('/python/pip-parser', methods=['POST']) #you can use this route in postman
+# @routes.route('/python/pip-parser-audit', methods=['POST'])
+# def pip_parser():
+#     try:
+#         if 'requirements_file' not in request.files:
+#             return jsonify({"error": "'requirements_file' is required."})
+
+#         uploaded_requirements_file = request.files['requirements_file']
+
+#         if not uploaded_requirements_file.filename:
+#             return jsonify({"error": "File name cannot be empty."})
+
+#         # Create paths using os.path.join
+#         uploads_folder = 'uploads'
+#         requirements_filename = uploaded_requirements_file.filename
+#         requirements_path = os.path.join(uploads_folder, requirements_filename)
+#         vulnerabilities_path = os.path.join(uploads_folder, 'audit.json')
+
+#         uploaded_requirements_file.save(requirements_path)
+
+#         # This will generate /uploads/audit.json (temporarily)
+#         fetch_vulnerabilities(requirements_path)
+
+#         output = parse_requirements(requirements_path)
+#         update_vulnerabilities(output, vulnerabilities_path)
+
+#         json_string = json.dumps(output, sort_keys=False, ensure_ascii=False)
+        
+#         # Remove the uploaded files
+#         os.remove(requirements_path) 
+#         os.remove(vulnerabilities_path)
+
+#         return jsonify(json_string)
+
+#     except Exception as e:
+#         return jsonify({"error": str(e)})
+    
+
+
+#use this route for postman
+@routes.route('/python/pip-parser', methods=['POST'])
 def pip_parser():
     try:
         if 'requirements_file' not in request.files:
@@ -89,22 +137,30 @@ def pip_parser():
         if not uploaded_requirements_file.filename:
             return jsonify({"error": "File name cannot be empty."})
 
-        requirements_path = f"uploads/{uploaded_requirements_file.filename}"
+        # Generate a unique identifier for this request (you can use a timestamp or UUID)
+        unique_identifier = str(uuid.uuid4())[:8]  # Using a UUID as an example
+
+        # Create paths using os.path.join
+        uploads_folder = 'uploads'
+        requirements_filename = f"{unique_identifier}_requirements.txt"
+        requirements_path = os.path.join(uploads_folder, requirements_filename)
+
         uploaded_requirements_file.save(requirements_path)
 
-        vulnerabilities_path = './uploads/audit.json'
+        # Parse requirements and fetch vulnerabilities from OSS Index API
+        components = parse_requirements(requirements_path)
+        # purls = [component["purl"] for component in components]
 
-        #this will generate /uploads/audit.json (temporarily)
-        fetch_vulnerabilities(requirements_path)
+        # vulnerabilities_data = fetch_vulnerabilities(purls)
 
-        output = parse_requirements(requirements_path)
-        update_vulnerabilities(output, vulnerabilities_path)
+        # if vulnerabilities_data:
+        #     # Update vulnerabilities in the components array
+        #     update_vulnerabilities(components, vulnerabilities_data)
 
+        json_string = json.dumps(components, sort_keys=False, ensure_ascii=False)
 
-        json_string = json.dumps(output, sort_keys=False, ensure_ascii=False)
-        
-        os.remove(requirements_path) 
-        os.remove(vulnerabilities_path)
+        # Remove the uploaded file
+        os.remove(requirements_path)
 
         return jsonify(json_string)
 

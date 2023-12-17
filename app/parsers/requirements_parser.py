@@ -3,15 +3,6 @@ import subprocess
 import json
 import os
 import chardet 
-import sys
-
-try:
-    print(sys.executable)
-    import pip_audit
-    subprocess.run(["pip-audit", "--version"])
-
-except Exception as e:
-    print(f"pip-audit error: {e}")
 
 def parse_requirements(requirements_path):
     components = []
@@ -69,26 +60,23 @@ def write_to_file(output, output_file_path):
 
         
 
-#it will run the pip-audit on requirements.txt 
-def fetch_vulnerabilities(requirements_path):
-    os.chdir('uploads')
-    try:
-        # Use subprocess.PIPE to capture the output for debugging
-        result = subprocess.run(
-            ["pip-audit", "-f", "json", "|", "python", "-m", "json.tool", ">", "audit.json"],
-            shell=True,
-            capture_output=True,
-            text=True
-        )
-        
-        # Print the result for debugging
-        print("Subprocess result:", result)
-        
-        if result.returncode != 0:
-            print("Error running pip-audit:", result.stderr)
-        
-    finally:
-        os.chdir('..')
+
+
+# def fetch_vulnerabilities(requirements_path):
+#     # Get the absolute path to the requirements file
+#     abs_requirements_path = os.path.abspath(requirements_path)
+
+#     # Construct the absolute path for the 'audit.json' file in the 'uploads' folder
+#     audit_json_path = os.path.join(os.getcwd(), 'uploads', 'audit.json')
+
+#     try:
+
+#         # Run pip-audit on the specified requirements.txt file and capture the output in audit.json
+#         with open(audit_json_path, 'w') as audit_file:
+#             result = subprocess.run(["pip-audit", "-f", "json", "-r", abs_requirements_path], stdout=audit_file, stderr=subprocess.PIPE)
+            
+#     except subprocess.CalledProcessError as e:
+#         print(f"Error running pip-audit: {e}")
 
 
 #for updating vulnerabilities array after we get audit.json
