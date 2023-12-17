@@ -1,11 +1,13 @@
-import json 
+import json
+
 
 def parse_package_lock(package_lock_path, package_audit_path, obj=False):
 
     components = []
 
     with open(package_lock_path) as f:
-        pkg_json = json.load(f)  
+        pkg_json = json.load(f)
+        print(pkg_json)
     if obj == False:
         with open(package_audit_path) as f:
             vulnerabilities_data = json.load(f)["vulnerabilities"]
@@ -15,6 +17,7 @@ def parse_package_lock(package_lock_path, package_audit_path, obj=False):
     application = {
         "type": "application",
         "name": pkg_json["name"],
+        "language": "javascript",
         "version": pkg_json["version"],
         "purl": f"pkg:npm/{pkg_json['name']}@{pkg_json['version']}",
         "dependencies": [],
@@ -23,12 +26,12 @@ def parse_package_lock(package_lock_path, package_audit_path, obj=False):
 
     def add_component(name, version, purl, dependencies=[]):
         component = {
-            "type": "library", 
+            "type": "library",
             "name": name,
             "version": version,
             "purl": purl,
             "dependencies": dependencies,
-            "vulnerabilities": [],   
+            "vulnerabilities": [],
         }
         return component
 
@@ -38,16 +41,16 @@ def parse_package_lock(package_lock_path, package_audit_path, obj=False):
 
         if component_name in vulnerabilities_data:
 
-           vulnerability_info = vulnerabilities_data[component_name]
+            vulnerability_info = vulnerabilities_data[component_name]
 
-           vulnerability = {
-               "name": vulnerability_info["name"],
-               "severity": vulnerability_info["severity"],
-               "via": vulnerability_info["via"],
-               "effects": vulnerability_info["effects"]  
-           }
+            vulnerability = {
+                "name": vulnerability_info["name"],
+                "severity": vulnerability_info["severity"],
+                "via": vulnerability_info["via"],
+                "effects": vulnerability_info["effects"]
+            }
 
-           component["vulnerabilities"].append(vulnerability)
+            component["vulnerabilities"].append(vulnerability)
 
     def process_deps(deps, parent):
         if not deps:
@@ -77,9 +80,14 @@ def parse_package_lock(package_lock_path, package_audit_path, obj=False):
             else:
                 process_deps(dep_info.get("dependencies"), child_component)
 
-    process_deps(pkg_json.get("packages"), application)
+    if "dependencies" in pkg_json:
+        # npm v6 or lower
+        process_deps(pkg_json["dependencies"], application)
+    else:
+        process_deps(pkg_json.get("packages"), application)
 
     return components
+
 
 def write_to_file(output, output_file_path):
     with open(output_file_path, 'w') as output_file:

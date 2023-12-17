@@ -1,5 +1,8 @@
 # app/routes.py
 
+import zipfile
+import requests
+import shutil
 from flask import Blueprint, jsonify, request, json, Response
 from app.parsers.package_lock_parser import parse_package_lock, write_to_file
 from app.parsers.oss_python_parser import parse_requirements, fetch_vulnerabilities, update_vulnerabilities
@@ -11,15 +14,18 @@ routes = Blueprint('routes', __name__)
 
 load_dotenv()
 
+
 @routes.route('/')
 def starter_function():
     return "Flask: Parser for SIH"
 
-#javascript parser for local testing
+# javascript parser for local testing
+
+
 @routes.route('/generate')
 def create_js_sbom():
     package_lock_path = "./package-lock.json"
-    package_audit_path="./package_audit.json"
+    package_audit_path = "./package_audit.json"
     output = parse_package_lock(package_lock_path, package_audit_path)
 
     output_file_path = 'js-sbom.json'
@@ -28,39 +34,40 @@ def create_js_sbom():
     return jsonify({"message": "Parsed data written to js-sbom.json file."})
 
 
-#javascript parser for postman testing
+# javascript parser for postman testing
 @routes.route('/js/npm-parser', methods=['POST'])
 def npm_parser():
     try:
         uploaded_package_lock = request.files['package_lock']
         uploaded_package_audit = request.files['package_audit']
 
-        if uploaded_package_lock and uploaded_package_audit:  
+        if uploaded_package_lock and uploaded_package_audit:
             package_lock_path = f"uploads/{uploaded_package_lock.filename}"
             package_audit_path = f"uploads/{uploaded_package_audit.filename}"
             uploaded_package_lock.save(package_lock_path)
             uploaded_package_audit.save(package_audit_path)
 
-            parsed_data = parse_package_lock(package_lock_path, package_audit_path)
+            parsed_data = parse_package_lock(
+                package_lock_path, package_audit_path)
             json_string = json.dumps(
-                parsed_data, separators=(",", ":"), sort_keys=False, ensure_ascii=False) 
+                parsed_data, separators=(",", ":"), sort_keys=False, ensure_ascii=False)
             os.remove(package_lock_path)
             os.remove(package_audit_path)
 
             return jsonify(json_string, )
-    
+
     except Exception as e:
         return jsonify({"error": str(e)})
-    
 
 
+# python routes
 
-#python routes 
-
-@routes.route('/python-parser')  # use this route to test locally (put requirements.txt in uploads folder)
+# use this route to test locally (put requirements.txt in uploads folder)
+@routes.route('/python-parser')
 def create_python_sbom():
     try:
-        requirements_path = os.path.join(os.getcwd(), 'uploads', 'requirements.txt')
+        requirements_path = os.path.join(
+            os.getcwd(), 'uploads', 'requirements.txt')
 
         # Parsing requirements and fetching vulnerabilities from OSS Index API
         components = parse_requirements(requirements_path)
@@ -72,7 +79,8 @@ def create_python_sbom():
             # Updating vulnerabilities in the components array
             update_vulnerabilities(components, vulnerabilities_data)
 
-        output_file_path = os.path.join(os.getcwd(), 'uploads', 'python-sbom.json')
+        output_file_path = os.path.join(
+            os.getcwd(), 'uploads', 'python-sbom.json')
 
         # Writes the parsed data to the 'python-sbom.json' file
         write_to_file(components, output_file_path)
@@ -83,10 +91,8 @@ def create_python_sbom():
         return jsonify({"error": str(e)})
 
 
-
-
-#this route was using pip-audit to fetch vulnerabilities which was taking so long to fetch the vulnerabilities so that's why not using this
-#use for postman
+# this route was using pip-audit to fetch vulnerabilities which was taking so long to fetch the vulnerabilities so that's why not using this
+# use for postman
 # @routes.route('/python/pip-parser-audit', methods=['POST'])
 # def pip_parser():
 #     try:
@@ -113,19 +119,18 @@ def create_python_sbom():
 #         update_vulnerabilities(output, vulnerabilities_path)
 
 #         json_string = json.dumps(output, sort_keys=False, ensure_ascii=False)
-        
+
 #         # Remove the uploaded files
-#         os.remove(requirements_path) 
+#         os.remove(requirements_path)
 #         os.remove(vulnerabilities_path)
 
 #         return jsonify(json_string)
 
 #     except Exception as e:
 #         return jsonify({"error": str(e)})
-    
 
 
-#use this route for postman
+# use this route for postman
 @routes.route('/python/pip-parser', methods=['POST'])
 def pip_parser():
     try:
@@ -157,7 +162,8 @@ def pip_parser():
         #     # Update vulnerabilities in the components array
         #     update_vulnerabilities(components, vulnerabilities_data)
 
-        json_string = json.dumps(components, sort_keys=False, ensure_ascii=False)
+        json_string = json.dumps(
+            components, sort_keys=False, ensure_ascii=False)
 
         # Remove the uploaded file
         os.remove(requirements_path)
@@ -173,15 +179,16 @@ def extract_zip(zip_path, extract_dir):
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
         zip_ref.extractall(extract_dir)
 
-import shutil
+
 def clean_temp_directory(extract_dir):
     shutil.rmtree(extract_dir)
 
-import requests
+
 def post_request_with_file(package_json_file_path, package_lock_file_path):
     try:
-        url = os.getenv("js-server-url") +"/api/javascript/auditJsPackage"
-        headers = {'auth_type':'backend', 'auth_code':os.getenv('js-server-auth-key')}
+        url = os.getenv("js-server-url") + "/api/javascript/auditJsPackage"
+        headers = {'auth_type': 'backend',
+                   'auth_code': os.getenv('js-server-auth-key')}
         print(headers)
 
         files = {
@@ -203,21 +210,20 @@ def post_request_with_file(package_json_file_path, package_lock_file_path):
     except Exception as e:
         print(f"Error: {e}")
 
-import zipfile
-import os
+
 @routes.route('/parse_zip', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
         return jsonify({"error": "No file provided"}), 400
-    
+
     file = request.files['file']
 
     if file.filename == '':
         return jsonify({"error": "No file selected"}), 400
-    
+
     if not file.filename.endswith('.zip'):
         return jsonify({"error": "Invalid file format. Please provide a ZIP file"}), 400
-    
+
     extract_dir = 'temp_extract'
     os.makedirs(extract_dir, exist_ok=True)
 
@@ -229,14 +235,14 @@ def upload_file():
 
         # package_json_files = []
         # requirement_txt_files = []
-        package_files = {"package":"",'package_lock':""}
+        package_files = {"package": "", 'package_lock': ""}
 
         components = []
         for root, dirs, files in os.walk(extract_dir):
             for file_name in files:
                 file_path = os.path.join(root, file_name)
 
-                print("hit main code ",file_name)
+                print("hit main code ", file_name)
 
                 if file_name == 'package.json':
                     package_files['package'] = file_path
@@ -247,18 +253,21 @@ def upload_file():
                 elif file_name == 'REQUIREMENTS.txt':
                     pass
 
-                if package_files['package'] !='' and package_files['package_lock'] != '':
+                if package_files['package'] != '' and package_files['package_lock'] != '':
                     print('creating post req')
-                    res = post_request_with_file(package_json_file_path=package_files['package'], package_lock_file_path=package_files['package_lock'])
+                    res = post_request_with_file(
+                        package_json_file_path=package_files['package'], package_lock_file_path=package_files['package_lock'])
                     print(res.keys())
                     audit_obj = res["data"]
 
-                    parsed_data = parse_package_lock(package_lock_path=package_files['package_lock'],package_audit_path=audit_obj,obj=True)
+                    parsed_data = parse_package_lock(
+                        package_lock_path=package_files['package_lock'], package_audit_path=audit_obj, obj=True)
                     components.extend(parsed_data)
                     package_files['package'] = ''
-                    package_files['package_lock']= ''
-
-        return jsonify(components)
+                    package_files['package_lock'] = ''
+        json_string = json.dumps(
+            components, sort_keys=False, ensure_ascii=False)
+        return jsonify(json_string)
 
     except Exception as e:
         print(e)
@@ -266,4 +275,3 @@ def upload_file():
 
     finally:
         clean_temp_directory(extract_dir)
-

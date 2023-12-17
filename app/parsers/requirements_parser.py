@@ -2,7 +2,8 @@ import re
 import subprocess
 import json
 import os
-import chardet 
+import chardet
+
 
 def parse_requirements(requirements_path):
     components = []
@@ -22,7 +23,7 @@ def parse_requirements(requirements_path):
 
         # Splitting the requirement into name and version
         parts = re.split(r'[=<>!]+', requirement, 1)
-        #in some requirements files some libraries starting with capital letter and in pip audit all libraries are lowercase
+        # in some requirements files some libraries starting with capital letter and in pip audit all libraries are lowercase
         name = parts[0].strip().lower()
         version = parts[1].strip() if len(parts) > 1 else "unknown"
 
@@ -32,6 +33,7 @@ def parse_requirements(requirements_path):
             "type": "library",
             "name": name,
             "version": version,
+            "language": "python",
             "purl": purl,
             "dependencies": [],
             "vulnerabilities": []
@@ -52,14 +54,10 @@ def parse_requirements(requirements_path):
     return components
 
 
-
-#for testing within the environment
+# for testing within the environment
 def write_to_file(output, output_file_path):
     with open(output_file_path, 'w', encoding='utf-8') as output_file:
         json.dump(output, output_file, indent=2, ensure_ascii=False)
-
-        
-
 
 
 # def fetch_vulnerabilities(requirements_path):
@@ -74,12 +72,12 @@ def write_to_file(output, output_file_path):
 #         # Run pip-audit on the specified requirements.txt file and capture the output in audit.json
 #         with open(audit_json_path, 'w') as audit_file:
 #             result = subprocess.run(["pip-audit", "-f", "json", "-r", abs_requirements_path], stdout=audit_file, stderr=subprocess.PIPE)
-            
+
 #     except subprocess.CalledProcessError as e:
 #         print(f"Error running pip-audit: {e}")
 
 
-#for updating vulnerabilities array after we get audit.json
+# for updating vulnerabilities array after we get audit.json
 def update_vulnerabilities(output, vulnerabilities_path):
     with open(vulnerabilities_path) as f:
         vulnerabilities_data = json.load(f)["dependencies"]
@@ -89,10 +87,11 @@ def update_vulnerabilities(output, vulnerabilities_path):
 
         for component in dependencies:
             name = component["name"]
-            matching_vulnerabilities = [v for v in vulnerabilities_data if v["name"] == name]
+            matching_vulnerabilities = [
+                v for v in vulnerabilities_data if v["name"] == name]
 
             # Clear existing vulnerabilities for the component
-            component["vulnerabilities"] = [] #to prevent duplicate entries
+            component["vulnerabilities"] = []  # to prevent duplicate entries
 
             for vulnerability in matching_vulnerabilities:
                 if vulnerability.get("vulns"):
