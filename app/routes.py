@@ -200,5 +200,4 @@ def upload_file():
         return parse_zip_file(zip_path, extract_dir)
 
     except Exception as e:
-        print(e)
         return jsonify({"error": str(e)}), 500

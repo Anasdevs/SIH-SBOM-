@@ -7,7 +7,6 @@ def parse_package_lock(package_lock_path, package_audit_path, obj=False):
 
     with open(package_lock_path) as f:
         pkg_json = json.load(f)
-        print(pkg_json)
     if obj == False:
         with open(package_audit_path) as f:
             vulnerabilities_data = json.load(f)["vulnerabilities"]

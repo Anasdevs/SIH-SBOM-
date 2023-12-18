@@ -18,7 +18,6 @@ def post_request_with_file(package_json_file_path, package_lock_file_path):
     try:
         url = os.getenv("js-server-url") + "/api/javascript/auditJsPackage"
         headers = {'auth_type': 'backend', 'auth_code': os.getenv('js-server-auth-key')}
-        print(headers)
 
         files = {
             'package_json_file': ('package.json', open(package_json_file_path, 'rb')),
@@ -27,7 +26,6 @@ def post_request_with_file(package_json_file_path, package_lock_file_path):
         response = requests.post(url, headers=headers, files=files)
 
         if response.status_code == 200:
-            print("Request successful!")
             return response.json()
         else:
             print(f"Request failed with status code: {response.status_code}")
@@ -57,12 +55,11 @@ def parse_zip_file(zip_path, extract_dir):
                     pass
 
                 if package_files['package'] != '' and package_files['package_lock'] != '':
-                    print('creating post req')
                     res = post_request_with_file(
                         package_json_file_path=package_files['package'], package_lock_file_path=package_files['package_lock'])
-                    print(res.keys())
+    
                     audit_obj = res["data"]
-                    
+
                     parsed_data = parse_package_lock(
                         package_lock_path=package_files['package_lock'], package_audit_path=audit_obj, obj=True)
                     components.extend(parsed_data)
