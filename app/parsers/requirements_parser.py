@@ -33,7 +33,6 @@ def parse_requirements(requirements_path):
             "type": "library",
             "name": name,
             "version": version,
-            "language": "python",
             "purl": purl,
             "dependencies": [],
             "vulnerabilities": []
@@ -47,6 +46,8 @@ def parse_requirements(requirements_path):
         "name": "python-backend",
         "version": "1.0.0",
         "purl": "pkg:pypi/python-backend@1.0.0",
+        "language": "python",
+
         "dependencies": components,
     }
     components = [default_object]

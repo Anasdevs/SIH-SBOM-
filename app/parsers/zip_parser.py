@@ -4,6 +4,7 @@ import zipfile
 import requests
 import json
 from app.parsers.package_lock_parser import parse_package_lock
+from app.parsers.oss_python_parser import parse_requirements
 from flask import jsonify
 
 
@@ -38,7 +39,7 @@ def parse_zip_file(zip_path, extract_dir):
     try:
         extract_zip(zip_path, extract_dir)
 
-        package_files = {"package": "", 'package_lock': ""}
+        package_files = {"package": "", 'package_lock': "",'requirements':""}
 
         components = []
         for root, dirs, files in os.walk(extract_dir):
@@ -51,9 +52,11 @@ def parse_zip_file(zip_path, extract_dir):
                 if file_name == 'package-lock.json':
                     package_files['package_lock'] = file_path
 
-                elif file_name == 'REQUIREMENTS.txt':
-                    pass
+                if file_name in ['requirements.txt', 'REQUIREMENTS.txt']:
+                    package_files['requirements'] = file_path
 
+
+                    
                 if package_files['package'] != '' and package_files['package_lock'] != '':
                     res = post_request_with_file(
                         package_json_file_path=package_files['package'], package_lock_file_path=package_files['package_lock'])
@@ -65,6 +68,14 @@ def parse_zip_file(zip_path, extract_dir):
                     components.extend(parsed_data)
                     package_files['package'] = ''
                     package_files['package_lock'] = ''
+                
+                if package_files['requirements'] != '':
+                    parsed_data = parse_requirements(requirements_path=package_files['requirements'])
+                    print(parsed_data)
+                    components.extend(parsed_data)
+                    package_files['requirements'] = ''
+                    
+
         json_string = json.dumps(
             components, sort_keys=False, ensure_ascii=False)
         return jsonify(json_string)
