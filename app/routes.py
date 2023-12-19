@@ -1,6 +1,6 @@
 # app/routes.py
 
-from flask import Blueprint, jsonify, request, json, Response
+from flask import Blueprint, jsonify, request, json, Response, send_file
 from app.parsers.package_lock_parser import parse_package_lock, write_to_file
 from app.parsers.requirements_parser import parse_requirements, fetch_vulnerabilities, update_vulnerabilities
 from dotenv import load_dotenv, dotenv_values
@@ -47,12 +47,8 @@ def npm_parser():
     
     except Exception as e:
         return jsonify({"error": str(e)})
-    
-
-
 
 #python routes 
-
 @routes.route('/python-parser') #use this route to test locally  (put requirements.txt in uploads folder)
 def create_python_sbom():
     # Path to the requirements.txt file in the 'uploads' folder
@@ -202,7 +198,8 @@ def upload_file():
                     package_files['package'] = ''
                     package_files['package_lock']= ''
 
-        return jsonify(components)
+        json_string = json.dumps(components, separators=(",", ":"), sort_keys=False, ensure_ascii=False) 
+        return jsonify(json_string)
 
     except Exception as e:
         print(e)
@@ -211,3 +208,35 @@ def upload_file():
     finally:
         clean_temp_directory(extract_dir)
 
+import io
+@routes.route('/get_pdf', methods=['post'])
+def get_pdf():
+    # try:
+    if 'sbom_file' not in request.files:
+        return {"Error": "No 'sbom_file' provided in the request."}, 400
+
+    sbom_file = request.files['sbom_file']
+
+    if sbom_file.filename == '':
+        return {"Error": "No selected file."}, 400
+
+    if sbom_file and sbom_file.filename.endswith('.json'):
+        sbom_data = json.load(sbom_file)
+    
+        from .helper import create_markdown_report, get_pdf
+
+        markdown = create_markdown_report(sbom_data)
+        pdf_content = get_pdf(markdown)
+
+        if pdf_content is not None:
+            return send_file(
+                io.BytesIO(pdf_content),
+                mimetype='application/pdf',
+                as_attachment=True,
+                download_name='generated_pdf.pdf'
+            )
+        else:
+            return "PDF generation failed.", 500
+    # except Exception as e:
+    #     print(e)
+    #     return {"Error":"An error occurred while generating the PDF"}

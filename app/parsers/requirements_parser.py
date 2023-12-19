@@ -3,6 +3,15 @@ import subprocess
 import json
 import os
 import chardet 
+import sys
+
+try:
+    print(sys.executable)
+    import pip_audit
+    subprocess.run(["pip-audit", "--version"])
+
+except Exception as e:
+    print(f"pip-audit error: {e}")
 
 def parse_requirements(requirements_path):
     components = []
