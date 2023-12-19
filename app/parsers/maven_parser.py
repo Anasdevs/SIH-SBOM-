@@ -86,6 +86,7 @@ def parse_pom_and_fetch_vulnerabilities(xml_data):
     vulnerabilities_data = fetch_vulnerabilities(purls)
     if vulnerabilities_data:
         update_vulnerabilities(components, vulnerabilities_data)
+    
 
     # Constructing the transformed project_info
     project_info = {
@@ -97,4 +98,6 @@ def parse_pom_and_fetch_vulnerabilities(xml_data):
         "dependencies": components
     }
 
-    return project_info
+    components = [project_info]
+
+    return components
