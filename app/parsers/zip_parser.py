@@ -71,7 +71,6 @@ def parse_zip_file(zip_path, extract_dir):
                 
                 if package_files['requirements'] != '':
                     parsed_data = parse_requirements(requirements_path=package_files['requirements'])
-                    print(parsed_data)
                     components.extend(parsed_data)
                     package_files['requirements'] = ''
                     

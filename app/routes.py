@@ -1,12 +1,11 @@
 # app/routes.py
 
-import zipfile
-import requests
-import shutil
 from flask import Blueprint, jsonify, request, json, Response
 from app.parsers.package_lock_parser import parse_package_lock, write_to_file
 from app.parsers.oss_python_parser import parse_requirements, fetch_vulnerabilities, update_vulnerabilities
+from app.parsers.maven_parser import parse_pom_and_fetch_vulnerabilities, fetch_vulnerabilities, update_vulnerabilities
 from app.parsers.zip_parser import parse_zip_file
+from werkzeug.utils import secure_filename
 from dotenv import load_dotenv, dotenv_values
 import os
 import uuid
@@ -201,3 +200,29 @@ def upload_file():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+
+
+
+@routes.route('/java/maven-parser', methods=['POST'])
+def maven_parser():
+    try:
+        if 'pom_file' not in request.files:
+            return jsonify({"error": "'pom_file' is required."})
+
+        uploaded_pom_file = request.files['pom_file']
+
+        if not uploaded_pom_file.filename:
+            return jsonify({"error": "File name cannot be empty."})
+
+        pom_data = uploaded_pom_file.read()
+
+        # Parse pom.xml and fetch vulnerabilities
+        components = parse_pom_and_fetch_vulnerabilities(pom_data)
+
+        json_string = json.dumps(components, sort_keys=False, ensure_ascii=False)
+
+        return jsonify(json_string)
+
+    except Exception as e:
+        return jsonify({"error": str(e)})
