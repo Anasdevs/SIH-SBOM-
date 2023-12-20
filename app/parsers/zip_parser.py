@@ -40,7 +40,7 @@ def parse_zip_file(zip_path, extract_dir):
     try:
         extract_zip(zip_path, extract_dir)
 
-        package_files = {"package": "", 'package_lock': "",'requirements':"", 'pom': ""}
+        package_files = {"package": "", "package_lock" : "", "requirements" : "", "pom" : ""}
         os_files = {"package": [], 'details': {}}
 
         components = []
@@ -53,7 +53,7 @@ def parse_zip_file(zip_path, extract_dir):
 
                 if file_name == 'package-lock.json':
                     package_files['package_lock'] = file_path
-                
+            
                 if file_name == 'PKGS_MANAGEMENT':
                     from .os_parser import get_packages
                     res = get_packages(file_name)
@@ -89,6 +89,8 @@ def parse_zip_file(zip_path, extract_dir):
 
                 if package_files['pom'] != '':
                     parsed_data = parse_pom_and_fetch_vulnerabilities(xml_data=package_files['pom'])
+                    components.extend(parsed_data)
+                    package_files['pom'] = ''
                     
 
         json_string = json.dumps(

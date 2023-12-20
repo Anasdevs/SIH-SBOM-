@@ -4,8 +4,8 @@ from flask import Blueprint, jsonify, request, json, Response, send_file
 from app.parsers.package_lock_parser import parse_package_lock, write_to_file
 from app.parsers.oss_python_parser import parse_requirements, fetch_vulnerabilities, update_vulnerabilities
 from app.parsers.maven_parser import parse_pom_and_fetch_vulnerabilities, fetch_vulnerabilities, update_vulnerabilities
+from app.parsers.composer_parser import parse_composer_json, fetch_vulnerabilities, update_vulnerabilities
 from app.parsers.zip_parser import parse_zip_file
-from werkzeug.utils import secure_filename
 import os
 import uuid
 
@@ -182,8 +182,10 @@ def upload_file():
     if not file.filename.endswith('.zip'):
         return jsonify({"error": "Invalid file format. Please provide a ZIP file"}), 400
 
+    print("Got file")
     extract_dir = 'temp_extract'
     os.makedirs(extract_dir, exist_ok=True)
+    print("Made directory")
 
     try:
         zip_path = os.path.join(extract_dir, file.filename)
@@ -283,6 +285,39 @@ def mailing_function():
 	"link":"a very orignal link"
 }
 '''
+
+@routes.route('/php/composer-parser', methods=['POST'])
+def composer_parser():
+    try:
+        if 'composer_file' not in request.files:
+            return jsonify({"error": "'composer_file' is required."})
+
+        uploaded_composer_file = request.files['composer_file']
+
+        if not uploaded_composer_file.filename:
+            return jsonify({"error": "File name cannot be empty."})
+
+        uploads_folder = 'uploads'
+        current_directory = os.getcwd()
+        composer_json_path = os.path.join(current_directory, uploads_folder, 'composer.json')
+
+        # Save the uploaded file to the 'uploads' folder
+        uploaded_composer_file.save(composer_json_path)
+
+        # Parse composer.json and fetch vulnerabilities
+        components = parse_composer_json(composer_json_path)
+
+        json_string = json.dumps(components, sort_keys=False, ensure_ascii=False)
+
+        # Optionally, remove the uploaded file after parsing
+        os.remove(composer_json_path)
+
+
+        return jsonify(json_string)
+
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
 import subprocess
 import tempfile
 
