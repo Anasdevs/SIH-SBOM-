@@ -2,9 +2,11 @@
 from flask import Flask
 from app.routes import routes
 from dotenv import load_dotenv, dotenv_values
+from flask_cors import CORS
 
 app = Flask(__name__)
 app.register_blueprint(routes)
+CORS(app)
 
 from flask_mail import Mail
 import os
