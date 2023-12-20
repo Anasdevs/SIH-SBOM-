@@ -5,6 +5,7 @@ from app.parsers.package_lock_parser import parse_package_lock, write_to_file
 from app.parsers.oss_python_parser import parse_requirements, fetch_vulnerabilities, update_vulnerabilities
 from app.parsers.maven_parser import parse_pom_and_fetch_vulnerabilities, fetch_vulnerabilities, update_vulnerabilities
 from app.parsers.composer_parser import parse_composer_json, fetch_vulnerabilities, update_vulnerabilities
+from app.parsers.cargo_parser import parse_cargo_lock, fetch_vulnerabilities, update_vulnerabilities
 from app.parsers.zip_parser import parse_zip_file
 import os
 import uuid
@@ -313,6 +314,40 @@ def composer_parser():
 
         # Optionally, remove the uploaded file after parsing
         os.remove(composer_json_path)
+
+
+        return jsonify(json_string)
+
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+
+
+
+@routes.route('/rust/cargo-parser', methods=['POST'])
+def cargo_parser():
+    try:
+        if 'cargo_file' not in request.files:
+            return jsonify({"error": "Cargo file is required."})
+
+        uploaded_cargo_file = request.files['cargo_file']
+
+        if not uploaded_cargo_file.filename:
+            return jsonify({"error": "File name cannot be empty."})
+
+        uploads_folder = 'uploads'
+        current_directory = os.getcwd()
+        cargo_json_path = os.path.join(current_directory, uploads_folder, 'cargo.json')
+
+        # Save the uploaded file to the 'uploads' folder
+        uploaded_cargo_file.save(cargo_json_path)
+
+        # Parse composer.json and fetch vulnerabilities
+        components = parse_cargo_lock(cargo_json_path)
+
+        json_string = json.dumps(components, sort_keys=False, ensure_ascii=False)
+
+        os.remove(cargo_json_path)
 
 
         return jsonify(json_string)

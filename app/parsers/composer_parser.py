@@ -114,12 +114,3 @@ def parse_composer_json(composer_json_path):
     output = [default_object]
 
     return output
-
-# Example usage:
-# composer_json_path = './uploads/composer.json'
-# output = parse_composer_json(composer_json_path)
-
-# # For testing within the environment
-# output_file_path = './uploads/composer-PARSED.json'
-# with open(output_file_path, 'w', encoding='utf-8') as output_file:
-#     json.dump(output, output_file, indent=2, ensure_ascii=False)
