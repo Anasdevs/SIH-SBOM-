@@ -41,6 +41,7 @@ def parse_zip_file(zip_path, extract_dir):
         extract_zip(zip_path, extract_dir)
 
         package_files = {"package": "", 'package_lock': "",'requirements':"", 'pom': ""}
+        os_files = {"package": [], 'details': {}}
 
         components = []
         for root, dirs, files in os.walk(extract_dir):
@@ -51,6 +52,15 @@ def parse_zip_file(zip_path, extract_dir):
                     package_files['package'] = file_path
 
                 if file_name == 'package-lock.json':
+                    package_files['package_lock'] = file_path
+                
+                if file_name == 'PKGS_MANAGEMENT':
+                    from .os_parser import get_packages
+                    res = get_packages(file_name)
+                    os_files['package'] = res
+
+                if file_name == 'README.pkgs_specs':
+                    
                     package_files['package_lock'] = file_path
 
                 if file_name in ['requirements.txt', 'REQUIREMENTS.txt']:
