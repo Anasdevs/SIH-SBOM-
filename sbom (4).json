@@ -1,0 +1,524 @@
+{
+  "name":"dummie name",
+  "author":"author",
+  "format": "live-WireSBOMReport",
+  "components": [
+  {
+    "type": "application",
+    "name": "frontend",
+    "version": "0.1.0",
+    "purl": "pkg:npm/frontend@0.1.0", 
+    "dependencies": [
+      {
+        "type": "library",
+        "name": "@ampproject/remapping",
+        "version": "2.2.0",
+        "purl": "pkg:npm/@ampproject/remapping@2.2.0",
+        "dependencies": [],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "@apideck/better-ajv-errors",
+        "version": "0.3.6",
+        "purl": "pkg:npm/@apideck/better-ajv-errors@0.3.6",
+        "dependencies": [],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "@babel/code-frame",
+        "version": "7.18.6",
+        "purl": "pkg:npm/@babel/code-frame@7.18.6",
+        "dependencies": [],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "@babel/compat-data",
+        "version": "7.18.8",
+        "purl": "pkg:npm/@babel/compat-data@7.18.8",
+        "dependencies": [],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "@babel/core",
+        "version": "7.18.9",
+        "purl": "pkg:npm/@babel/core@7.18.9",
+        "dependencies": [
+          {
+            "type": "library",
+            "name": "semver",
+            "version": "6.3.0",
+            "purl": "pkg:npm/semver@6.3.0",
+            "dependencies": [],
+            "vulnerabilities": [
+              {
+                "name": "semver",
+                "severity": "moderate",
+                "via": [
+                  {
+                    "source": 1094555,
+                    "name": "semver",
+                    "dependency": "semver",
+                    "title": "semver vulnerable to Regular Expression Denial of Service",
+                    "url": "https://github.com/advisories/GHSA-c2qf-rxjj-qqgw",
+                    "severity": "moderate",
+                    "cwe": [
+                      "CWE-1333"
+                    ],
+                    "cvss": {
+                      "score": 5.3,
+                      "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+                    },
+                    "range": ">=6.0.0 <6.3.1"
+                  },
+                  {
+                    "source": 1094556,
+                    "name": "semver",
+                    "dependency": "semver",
+                    "title": "semver vulnerable to Regular Expression Denial of Service",
+                    "url": "https://github.com/advisories/GHSA-c2qf-rxjj-qqgw",
+                    "severity": "moderate",
+                    "cwe": [
+                      "CWE-1333"
+                    ],
+                    "cvss": {
+                      "score": 5.3,
+                      "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+                    },
+                    "range": ">=7.0.0 <7.5.2"
+                  }
+                ],
+                "effects": [
+                  "core-js-compat"
+                ]
+              }
+            ]
+          }
+        ],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "@babel/eslint-parser",
+        "version": "7.18.9",
+        "purl": "pkg:npm/@babel/eslint-parser@7.18.9",
+        "dependencies": [
+          {
+            "type": "library",
+            "name": "eslint-scope",
+            "version": "5.1.1",
+            "purl": "pkg:npm/eslint-scope@5.1.1",
+            "dependencies": [],
+            "vulnerabilities": []
+          },
+          {
+            "type": "library",
+            "name": "eslint-visitor-keys",
+            "version": "2.1.0",
+            "purl": "pkg:npm/eslint-visitor-keys@2.1.0",
+            "dependencies": [],
+            "vulnerabilities": []
+          },
+          {
+            "type": "library",
+            "name": "estraverse",
+            "version": "4.3.0",
+            "purl": "pkg:npm/estraverse@4.3.0",
+            "dependencies": [],
+            "vulnerabilities": []
+          },
+          {
+            "type": "library",
+            "name": "semver",
+            "version": "6.3.0",
+            "purl": "pkg:npm/semver@6.3.0",
+            "dependencies": [],
+            "vulnerabilities": [
+              {
+                "name": "semver",
+                "severity": "moderate",
+                "via": [
+                  {
+                    "source": 1094555,
+                    "name": "semver",
+                    "dependency": "semver",
+                    "title": "semver vulnerable to Regular Expression Denial of Service",
+                    "url": "https://github.com/advisories/GHSA-c2qf-rxjj-qqgw",
+                    "severity": "moderate",
+                    "cwe": [
+                      "CWE-1333"
+                    ],
+                    "cvss": {
+                      "score": 5.3,
+                      "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+                    },
+                    "range": ">=6.0.0 <6.3.1"
+                  },
+                  {
+                    "source": 1094556,
+                    "name": "semver",
+                    "dependency": "semver",
+                    "title": "semver vulnerable to Regular Expression Denial of Service",
+                    "url": "https://github.com/advisories/GHSA-c2qf-rxjj-qqgw",
+                    "severity": "moderate",
+                    "cwe": [
+                      "CWE-1333"
+                    ],
+                    "cvss": {
+                      "score": 5.3,
+                      "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+                    },
+                    "range": ">=7.0.0 <7.5.2"
+                  }
+                ],
+                "effects": [
+                  "core-js-compat"
+                ]
+              }
+            ]
+          }
+        ],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "@babel/generator",
+        "version": "7.18.9",
+        "purl": "pkg:npm/@babel/generator@7.18.9",
+        "dependencies": [
+          {
+            "type": "library",
+            "name": "@jridgewell/gen-mapping",
+            "version": "0.3.2",
+            "purl": "pkg:npm/@jridgewell/gen-mapping@0.3.2",
+            "dependencies": [],
+            "vulnerabilities": []
+          }
+        ],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "@babel/helper-annotate-as-pure",
+        "version": "7.18.6",
+        "purl": "pkg:npm/@babel/helper-annotate-as-pure@7.18.6",
+        "dependencies": [],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "@babel/helper-builder-binary-assignment-operator-visitor",
+        "version": "7.18.9",
+        "purl": "pkg:npm/@babel/helper-builder-binary-assignment-operator-visitor@7.18.9",
+        "dependencies": [],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "@babel/helper-compilation-targets",
+        "version": "7.18.9",
+        "purl": "pkg:npm/@babel/helper-compilation-targets@7.18.9",
+        "dependencies": [
+          {
+            "type": "library",
+            "name": "semver",
+            "version": "6.3.0",
+            "purl": "pkg:npm/semver@6.3.0",
+            "dependencies": [],
+            "vulnerabilities": [
+              {
+                "name": "semver",
+                "severity": "moderate",
+                "via": [
+                  {
+                    "source": 1094555,
+                    "name": "semver",
+                    "dependency": "semver",
+                    "title": "semver vulnerable to Regular Expression Denial of Service",
+                    "url": "https://github.com/advisories/GHSA-c2qf-rxjj-qqgw",
+                    "severity": "moderate",
+                    "cwe": [
+                      "CWE-1333"
+                    ],
+                    "cvss": {
+                      "score": 5.3,
+                      "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+                    },
+                    "range": ">=6.0.0 <6.3.1"
+                  },
+                  {
+                    "source": 1094556,
+                    "name": "semver",
+                    "dependency": "semver",
+                    "title": "semver vulnerable to Regular Expression Denial of Service",
+                    "url": "https://github.com/advisories/GHSA-c2qf-rxjj-qqgw",
+                    "severity": "moderate",
+                    "cwe": [
+                      "CWE-1333"
+                    ],
+                    "cvss": {
+                      "score": 5.3,
+                      "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+                    },
+                    "range": ">=7.0.0 <7.5.2"
+                  }
+                ],
+                "effects": [
+                  "core-js-compat"
+                ]
+              }
+            ]
+          }
+        ],
+        "vulnerabilities": []
+      }
+    ]
+  },
+  {
+    "type": "application",
+    "name": "backend",
+    "version": "1.0.0",
+    "purl": "pkg:npm/backend@1.0.0",
+    "dependencies": [
+      {
+        "type": "library",
+        "name": "@types/node",
+        "version": "18.6.2",
+        "purl": "pkg:npm/@types/node@18.6.2",
+        "dependencies": [],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "@types/webidl-conversions",
+        "version": "6.1.1",
+        "purl": "pkg:npm/@types/webidl-conversions@6.1.1",
+        "dependencies": [],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "@types/whatwg-url",
+        "version": "8.2.2",
+        "purl": "pkg:npm/@types/whatwg-url@8.2.2",
+        "dependencies": [],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "accepts",
+        "version": "1.3.8",
+        "purl": "pkg:npm/accepts@1.3.8",
+        "dependencies": [],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "append-field",
+        "version": "1.0.0",
+        "purl": "pkg:npm/append-field@1.0.0",
+        "dependencies": [],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "array-flatten",
+        "version": "1.1.1",
+        "purl": "pkg:npm/array-flatten@1.1.1",
+        "dependencies": [],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "base64-js",
+        "version": "1.5.1",
+        "purl": "pkg:npm/base64-js@1.5.1",
+        "dependencies": [],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "bcryptjs",
+        "version": "2.4.3",
+        "purl": "pkg:npm/bcryptjs@2.4.3",
+        "dependencies": [],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "body-parser",
+        "version": "1.20.0",
+        "purl": "pkg:npm/body-parser@1.20.0",
+        "dependencies": [],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "bson",
+        "version": "4.6.5",
+        "purl": "pkg:npm/bson@4.6.5",
+        "dependencies": [],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "buffer",
+        "version": "5.7.1",
+        "purl": "pkg:npm/buffer@5.7.1",
+        "dependencies": [],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "buffer-equal-constant-time",
+        "version": "1.0.1",
+        "purl": "pkg:npm/buffer-equal-constant-time@1.0.1",
+        "dependencies": [],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "buffer-from",
+        "version": "1.1.2",
+        "purl": "pkg:npm/buffer-from@1.1.2",
+        "dependencies": [],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "busboy",
+        "version": "1.6.0",
+        "purl": "pkg:npm/busboy@1.6.0",
+        "dependencies": [],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "bytes",
+        "version": "3.1.2",
+        "purl": "pkg:npm/bytes@3.1.2",
+        "dependencies": [],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "call-bind",
+        "version": "1.0.2",
+        "purl": "pkg:npm/call-bind@1.0.2",
+        "dependencies": [],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "mongodb-connection-string-url",
+        "version": "2.5.3",
+        "purl": "pkg:npm/mongodb-connection-string-url@2.5.3",
+        "dependencies": [],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "mongoose",
+        "version": "6.5.0",
+        "purl": "pkg:npm/mongoose@6.5.0",
+        "dependencies": [
+          {
+            "type": "library",
+            "name": "ms",
+            "version": "2.1.3",
+            "purl": "pkg:npm/ms@2.1.3",
+            "dependencies": [],
+            "vulnerabilities": []
+          }
+        ],
+        "vulnerabilities": [
+          {
+            "name": "mongoose",
+            "severity": "critical",
+            "via": [
+              {
+                "source": 1095081,
+                "name": "mongoose",
+                "dependency": "mongoose",
+                "title": "Mongoose Prototype Pollution vulnerability",
+                "url": "https://github.com/advisories/GHSA-9m93-w8w6-76hh",
+                "severity": "critical",
+                "cwe": [
+                  "CWE-1321"
+                ],
+                "cvss": {
+                  "score": 10,
+                  "vectorString": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:N/A:H"
+                },
+                "range": ">=6.0.0 <6.11.3"
+              },
+              "mongodb"
+            ],
+            "effects": []
+          }
+        ]
+      },
+      {
+        "type": "library",
+        "name": "mpath",
+        "version": "0.9.0",
+        "purl": "pkg:npm/mpath@0.9.0",
+        "dependencies": [],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "mquery",
+        "version": "4.0.3",
+        "purl": "pkg:npm/mquery@4.0.3",
+        "dependencies": [
+          {
+            "type": "library",
+            "name": "debug",
+            "version": "4.3.4",
+            "purl": "pkg:npm/debug@4.3.4",
+            "dependencies": [],
+            "vulnerabilities": []
+          },
+          {
+            "type": "library",
+            "name": "ms",
+            "version": "2.1.2",
+            "purl": "pkg:npm/ms@2.1.2",
+            "dependencies": [],
+            "vulnerabilities": []
+          }
+        ],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "ms",
+        "version": "2.0.0",
+        "purl": "pkg:npm/ms@2.0.0",
+        "dependencies": [],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "multer",
+        "version": "1.4.5-lts.1",
+        "purl": "pkg:npm/multer@1.4.5-lts.1",
+        "dependencies": [],
+        "vulnerabilities": []
+      },
+      {
+        "type": "library",
+        "name": "xtend",
+        "version": "4.0.2",
+        "purl": "pkg:npm/xtend@4.0.2",
+        "dependencies": [],
+        "vulnerabilities": []
+      }
+    ]
+  }
+]
+}

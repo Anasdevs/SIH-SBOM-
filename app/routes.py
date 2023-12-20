@@ -1,27 +1,21 @@
 # app/routes.py
 
-from flask import Blueprint, jsonify, request, json, Response
+from flask import Blueprint, jsonify, request, json, Response, send_file
 from app.parsers.package_lock_parser import parse_package_lock, write_to_file
 from app.parsers.oss_python_parser import parse_requirements, fetch_vulnerabilities, update_vulnerabilities
 from app.parsers.maven_parser import parse_pom_and_fetch_vulnerabilities, fetch_vulnerabilities, update_vulnerabilities
 from app.parsers.zip_parser import parse_zip_file
 from werkzeug.utils import secure_filename
-from dotenv import load_dotenv, dotenv_values
 import os
 import uuid
 
 routes = Blueprint('routes', __name__)
-
-load_dotenv()
-
 
 @routes.route('/')
 def starter_function():
     return "Flask: Parser for SIH"
 
 # javascript parser for local testing
-
-
 @routes.route('/generate')
 def create_js_sbom():
     package_lock_path = "./package-lock.json"
@@ -226,3 +220,68 @@ def maven_parser():
 
     except Exception as e:
         return jsonify({"error": str(e)})
+
+import io
+@routes.route('/get_pdf', methods=['post'])
+def get_pdf():
+    data = request.get_json()
+    # try:
+    # if 'sbom_file' not in request.files:
+    #     return {"Error": "No 'sbom_file' provided in the request."}, 400
+
+    # sbom_file = request.files['sbom_file']
+
+    # if sbom_file.filename == '':
+    #     return {"Error": "No selected file."}, 400
+
+    # if sbom_file and sbom_file.filename.endswith('.json'):
+    sbom_data = data['data']
+
+    from .helper import create_markdown_report, get_pdf, preset_gpt
+    sys_prompt = 'give me a breif report of the given SBOM, include number of components, dependencies and vulnerabilities, etc, give 2 page worth of paragraph each time'
+    # gpt_gen = preset_gpt(System_prompt=sys_prompt, prompt=json.dumps(sbom_data))
+    # print(gpt_gen)
+    # markdown = create_markdown_report(sbom_data, gpt_gen)
+    markdown = create_markdown_report(sbom_data)
+    pdf_content = get_pdf(markdown)
+
+    if pdf_content is not None:
+        return send_file(
+            io.BytesIO(pdf_content),
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name='generated_pdf.pdf'
+        )
+    else:
+        return "PDF generation failed.", 500
+    # except Exception as e:
+    #     print(e)
+    #     return {"Error":"An error occurred while generating the PDF"}
+
+@routes.route("/mail_notification", methods=['POST'])
+def mailing_function():
+    data = request.get_json()
+        
+    email = data['email']
+    liberary = data['liberary']
+    version = data['version']
+    message = data['message']
+    link = data['link']
+
+    from .helper import send_email
+
+    res = send_email(email= email, liberary= liberary, version=version,link=link, lib_message=message)
+    if res:
+        return jsonify({"Status":True}), 200
+    else:
+        return jsonify({"Status":False}), 200
+    
+'''
+{
+	"email":"harshagnihotri90@gmail.com",
+	"liberary":"pandas",
+	"version":"1.2.3",
+	"message":"super serious message",
+	"link":"a very orignal link"
+}
+'''
