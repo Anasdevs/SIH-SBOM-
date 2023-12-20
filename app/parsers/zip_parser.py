@@ -5,6 +5,7 @@ import requests
 import json
 from app.parsers.package_lock_parser import parse_package_lock
 from app.parsers.oss_python_parser import parse_requirements
+from app.parsers.maven_parser import parse_pom_and_fetch_vulnerabilities
 from flask import jsonify
 
 
@@ -39,7 +40,7 @@ def parse_zip_file(zip_path, extract_dir):
     try:
         extract_zip(zip_path, extract_dir)
 
-        package_files = {"package": "", 'package_lock': "",'requirements':""}
+        package_files = {"package": "", 'package_lock': "",'requirements':"", 'pom': ""}
 
         components = []
         for root, dirs, files in os.walk(extract_dir):
@@ -55,6 +56,8 @@ def parse_zip_file(zip_path, extract_dir):
                 if file_name in ['requirements.txt', 'REQUIREMENTS.txt']:
                     package_files['requirements'] = file_path
 
+                if file_name in ['pom.xml']:
+                    package_files['pom'] = file_path
 
                     
                 if package_files['package'] != '' and package_files['package_lock'] != '':
@@ -71,9 +74,11 @@ def parse_zip_file(zip_path, extract_dir):
                 
                 if package_files['requirements'] != '':
                     parsed_data = parse_requirements(requirements_path=package_files['requirements'])
-                    print(parsed_data)
                     components.extend(parsed_data)
                     package_files['requirements'] = ''
+
+                if package_files['pom'] != '':
+                    parsed_data = parse_pom_and_fetch_vulnerabilities(xml_data=package_files['pom'])
                     
 
         json_string = json.dumps(
