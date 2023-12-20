@@ -188,8 +188,10 @@ def upload_file():
     if not file.filename.endswith('.zip'):
         return jsonify({"error": "Invalid file format. Please provide a ZIP file"}), 400
 
+    print("Got file")
     extract_dir = 'temp_extract'
     os.makedirs(extract_dir, exist_ok=True)
+    print("Made directory")
 
     try:
         zip_path = os.path.join(extract_dir, file.filename)

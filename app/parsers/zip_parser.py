@@ -40,7 +40,7 @@ def parse_zip_file(zip_path, extract_dir):
     try:
         extract_zip(zip_path, extract_dir)
 
-        package_files = {"package": "", 'package_lock': "",'requirements':"", 'pom': ""}
+        package_files = {"package": "", "package_lock" : "", "requirements" : "", "pom" : ""}
 
         components = []
         for root, dirs, files in os.walk(extract_dir):
@@ -79,6 +79,8 @@ def parse_zip_file(zip_path, extract_dir):
 
                 if package_files['pom'] != '':
                     parsed_data = parse_pom_and_fetch_vulnerabilities(xml_data=package_files['pom'])
+                    components.extend(parsed_data)
+                    package_files['pom'] = ''
                     
 
         json_string = json.dumps(
