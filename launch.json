@@ -1,0 +1,20 @@
+// File "launch.json"
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Flask",
+      "type": "python",
+      "request": "launch",
+      "stopOnEntry": false,
+      "pythonPath": "${config:python.pythonPath}",
+      "program": "${workspaceRoot}/main.py",
+      "env": {
+        "FLASK_APP": "${workspaceRoot}/main.py"
+      },
+      "args": ["run"],
+      "envFile": "${workspaceFolder}/.env",
+      "debugOptions": ["RedirectOutput"]
+    }
+  ]
+}
