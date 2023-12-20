@@ -76,29 +76,13 @@ def get_pdf(markdown_content = "# Heading 1"):
         print(f"Error: {response.status_code}\n{response.text}")
 
 from flask_mail import Message
-from .config import mail
-def send_email(email,liberary, version,link,lib_message):
+from app.config import mail
+# import .config
+def send_email(email,message1,subject):
     # try:
-        subject = "new version of liberaries found in you SBOM"
-        message = Message(subject=subject, recipients=[email])
-        message.body ='''
-I hope this message finds you well. We are herby notifying you for the release of a new version of the '''+liberary+''' library, packed new features and enhancements that will elevate your user experience.\n\n
-
-Description of the New Version:\n\n
-'''+lib_message+'''
-\n\n
-To delve deeper into the enhancements and explore the full potential of the latest version, we encourage you to log in to your dashboard. The link to access your dashboard is provided below:
-\n\n
-'''+link+'''
-\n\n
-We believe that these updates will significantly enhance your experience with the x library, and we look forward to hearing your feedback.
-\n\n
-Thank you for your continued support.
-\n\n
-Best regards,
-\n\n
-Team secure compose
-'''
+        subject = subject
+        message = Message(subject=subject, recipients=[email],sender = 'sudo.harsh404@gmail.com')
+        message.body= message1
         mail.send(message)
         return True
     # except Exception as e:

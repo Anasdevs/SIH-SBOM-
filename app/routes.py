@@ -266,14 +266,12 @@ def mailing_function():
     data = request.get_json()
         
     email = data['email']
-    liberary = data['liberary']
-    version = data['version']
     message = data['message']
-    link = data['link']
+    subject = data['subject']
 
     from .helper import send_email
 
-    res = send_email(email= email, liberary= liberary, version=version,link=link, lib_message=message)
+    res = send_email(email= email, message1=message,subject= subject)
     if res:
         return jsonify({"Status":True}), 200
     else:
@@ -321,6 +319,52 @@ def composer_parser():
     except Exception as e:
         return jsonify({"error": str(e)})
 
+import subprocess
+import tempfile
+
+import os
+import tempfile
+import shutil
+@routes.route('/upload_exe', methods=['POST'])
+def upload_exe():
+    # try:
+        # Check if the POST request has the file part
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'})
+
+    file = request.files['file']
+
+    # Check if the file is empty
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'})
+
+    # Check if the file has a valid extension (e.g., .exe)
+    if not file.filename.endswith('.exe'):
+        return jsonify({'error': 'Invalid file extension'})
+
+    # Create a temporary directory to store the file
+    temp_dir = tempfile.mkdtemp()
+    temp_file_path = os.path.join(temp_dir, file.filename)
+
+    # Save the file to the temporary directory
+    file.save(temp_file_path)
+
+    # Provide the repo information (replace with your actual repo logic)
+    # repo_info = {'repo_url': 'https://example.com/repo'}
+
+    # Run the process_exe function
+    from .parsers.exe_parser import analyze_pe_file
+    result = analyze_pe_file(temp_file_path)
+
+
+    # Delete the temporary directory and its contents
+    shutil.rmtree(temp_dir, ignore_errors=True)
+
+    return jsonify({'result': result})
+
+
+    # except Exception as e:
+    #     return jsonify({'error': str(e)})
 
 
 
