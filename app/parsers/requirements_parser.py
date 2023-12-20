@@ -61,24 +61,6 @@ def write_to_file(output, output_file_path):
         json.dump(output, output_file, indent=2, ensure_ascii=False)
 
 
-# def fetch_vulnerabilities(requirements_path):
-#     # Get the absolute path to the requirements file
-#     abs_requirements_path = os.path.abspath(requirements_path)
-
-#     # Construct the absolute path for the 'audit.json' file in the 'uploads' folder
-#     audit_json_path = os.path.join(os.getcwd(), 'uploads', 'audit.json')
-
-#     try:
-
-#         # Run pip-audit on the specified requirements.txt file and capture the output in audit.json
-#         with open(audit_json_path, 'w') as audit_file:
-#             result = subprocess.run(["pip-audit", "-f", "json", "-r", abs_requirements_path], stdout=audit_file, stderr=subprocess.PIPE)
-
-#     except subprocess.CalledProcessError as e:
-#         print(f"Error running pip-audit: {e}")
-
-
-# for updating vulnerabilities array after we get audit.json
 def update_vulnerabilities(output, vulnerabilities_path):
     with open(vulnerabilities_path) as f:
         vulnerabilities_data = json.load(f)["dependencies"]
@@ -104,3 +86,25 @@ def update_vulnerabilities(output, vulnerabilities_path):
                         }
 
                         component["vulnerabilities"].append(vulnerability_info)
+
+
+
+
+# def fetch_vulnerabilities(requirements_path):
+#     # Get the absolute path to the requirements file
+#     abs_requirements_path = os.path.abspath(requirements_path)
+
+#     # Construct the absolute path for the 'audit.json' file in the 'uploads' folder
+#     audit_json_path = os.path.join(os.getcwd(), 'uploads', 'audit.json')
+
+#     try:
+
+#         # Run pip-audit on the specified requirements.txt file and capture the output in audit.json
+#         with open(audit_json_path, 'w') as audit_file:
+#             result = subprocess.run(["pip-audit", "-f", "json", "-r", abs_requirements_path], stdout=audit_file, stderr=subprocess.PIPE)
+
+#     except subprocess.CalledProcessError as e:
+#         print(f"Error running pip-audit: {e}")
+
+
+# for updating vulnerabilities array after we get audit.json
